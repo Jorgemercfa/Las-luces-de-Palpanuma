@@ -10,6 +10,9 @@
       <router-link @click="closeMenu" to="/Storie-item" class="text-navbar"
         >Libros</router-link
       >
+      <router-link @click="closeMenu" to="/Author-item" class="text-navbar"
+        >Autor</router-link
+      >
     </div>
     <div class="hamburger" @click="toggleMenu">☰</div>
   </nav>
