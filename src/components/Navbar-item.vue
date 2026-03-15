@@ -13,6 +13,9 @@
       <router-link @click="closeMenu" to="/Author-item" class="text-navbar"
         >Autor</router-link
       >
+      <router-link @click="closeMenu" to="/Sale-item" class="text-navbar"
+        >Ventas</router-link
+      >
     </div>
     <div class="hamburger" @click="toggleMenu">☰</div>
   </nav>
