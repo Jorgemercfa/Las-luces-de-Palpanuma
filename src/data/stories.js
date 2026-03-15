@@ -1,11 +1,23 @@
 export default [
   {
     id: 1,
-    name: 'Las luces de Palpanuma',
+    name: 'Las Luces de Palpanuma',
     shortDescription:
-      'En 2058, Sigurd, hijo de la casa Ornstein, es secuestradoy sujeto a experimentos a manos del Gran Russ.',
+      'Nazca, una joven temerosa, abandona su isla y emprende un viaje peligroso hacia Palpanuma.',
     longDescription: `
-     Es el año 2058, a finales de la Guerra Euro-Soviética, Sigurd, hijo menor de la casa Ornstein de Stuttgart, es sometido a brutales experimentos tras haber sido secuestrado por el infame grupo terrorista Gran Russ. Su poderosa familia lucha por encontrarlo y recuperarlo, sin embargo, distintos acontecimientos sacudirán a esta gran familia Germánica, mientras Sigurd, luchando con las secuelas de los experimentos, buscará la forma de volver a encajar en su familia mientras la guerra vuelve a asomarse en el horizonte, lista para llevar nuevamente a los lobos a la batalla. 
+     Nazca tiene catorce años y un mundo sin conocer. Ella es una chica muy
+          temerosa y sensible que vive en una pequeña isla en el medio del mar
+          llamada Noribo, la cual forma parte de un archipiélago en el Ártico
+          conocido como Lyanangaia, una de las zonas más inhóspitas del planeta
+          Tierra. Ella era muy solitaria, aunque no siempre fue así, sus padres
+          eran sus únicos amigos, quienes además la protegían de todos los
+          peligros que las islas escondían en sus sombras. Por ello, Nazca,
+          nunca había tenido la necesidad de poner un pie afuera de su casa o
+          hacer algo por su cuenta. Hasta que un día algo horrible pasa. Algo
+          que la forzará a emprender un largo viaje a través de mar y tierra por
+          todo el archipiélago en búsqueda de las luces de una misteriosa
+          montaña llamada Palpanuma, sin saber que un latente peligro la estaría
+          acechando desde el primer día que partió de su hogar.
     `,
     image: require('@/assets/book_home_1.png'),
     image2: require('@/assets/homeimg1.png'),

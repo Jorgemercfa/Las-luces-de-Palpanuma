@@ -34,7 +34,7 @@ const year = new Date().getFullYear();
       </div>
     </div>
     <div class="footer-bottom">
-      © {{ year }} GOctavio Miranda. Todos los derechos reservados.
+      © {{ year }} Octavio Miranda. Todos los derechos reservados.
     </div>
   </footer>
 </template>

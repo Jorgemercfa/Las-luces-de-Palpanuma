@@ -66,13 +66,14 @@ onBeforeUnmount(() => {
     </div>
 
     <div class="text-home">
-      Somos una empresa de control de plagas de atención experta y
-      personalizada. Brindamos servicios de saneamiento ambiental:
-      Desinsectación, Desratización y Desinfección. También realizamos
-      Mantenimiento de Insectocutores, Limpieza de Tanques y Cisternas y Control
-      Aviar.
+      Nazca, una chica temerosa de catorce años que vive aislada en la inhóspita
+      isla de Noribo, en el archipiélago ártico de Lyanangaia, se ve obligada a
+      abandonar la seguridad de su hogar cuando ocurre un trágico suceso. Sin
+      experiencia en el mundo exterior, emprende un peligroso viaje por mar y
+      tierra en busca de las misteriosas luces de la montaña Palpanuma, sin
+      saber que una amenaza la sigue desde el momento en que partió.
     </div>
-    <h1 class="title-home">Nuestros servicios</h1>
+    <h1 class="title-home">Libros</h1>
     <div class="our-stories">
       <router-link
         v-for="storie in stories"
