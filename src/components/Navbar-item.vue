@@ -16,6 +16,12 @@
       <router-link @click="closeMenu" to="/NewsLetter-item" class="text-navbar"
         >Blog</router-link
       >
+      <router-link
+        @click="closeMenu"
+        to="/Illustration-item"
+        class="text-navbar"
+        >Ilustraciones</router-link
+      >
       <router-link @click="closeMenu" to="/Contact-item" class="text-navbar"
         >Contacto</router-link
       >
