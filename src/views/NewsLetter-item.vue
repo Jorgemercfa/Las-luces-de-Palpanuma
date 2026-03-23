@@ -5,16 +5,25 @@ import Footer from '@/components/Footer-item.vue';
 
 const AUTHOR_USER = 'octavio';
 const AUTHOR_PASSWORD = 'Palpanuma2026';
-const POSTS_STORAGE_KEY = 'palpanuma-newsletter-posts';
 const SESSION_STORAGE_KEY = 'palpanuma-newsletter-author';
+
+const GITHUB_USER = '<my-github-username>';
+const GITHUB_REPO = '<my-repo>';
+const FILE_PATH = 'public/posts.json';
+const BRANCH = 'main';
+const TOKEN = '<github-token>';
+
+const GITHUB_CONTENTS_URL = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${FILE_PATH}`;
 
 const loginForm = ref({ user: '', password: '' });
 const postForm = ref({ title: '', note: '' });
 const uploadedPhotos = ref([]);
 const posts = ref([]);
 const isAuthor = ref(false);
+const isLoading = ref(false);
 const loginError = ref('');
 const postError = ref('');
+const syncError = ref('');
 
 const sortedPosts = computed(() =>
   [...posts.value].sort(
@@ -22,32 +31,127 @@ const sortedPosts = computed(() =>
   ),
 );
 
-onMounted(() => {
-  loadPosts();
+onMounted(async () => {
   isAuthor.value = sessionStorage.getItem(SESSION_STORAGE_KEY) === 'true';
+  await loadPosts();
 });
 
-function loadPosts() {
-  const savedPosts = localStorage.getItem(POSTS_STORAGE_KEY);
+function createDefaultPosts() {
+  return [
+    {
+      id: Date.now(),
+      title: 'Bienvenidos al Newsletter',
+      note: 'Este espacio será usado para compartir avances del libro, notas del autor e imágenes exclusivas del proceso creativo.',
+      photos: [],
+      createdAt: new Date().toISOString(),
+    },
+  ];
+}
 
-  if (savedPosts) {
-    posts.value = JSON.parse(savedPosts);
-  } else {
-    posts.value = [
-      {
-        id: Date.now(),
-        title: 'Bienvenidos al Newsletter',
-        note: 'Este espacio será usado para compartir avances del libro, notas del autor e imágenes exclusivas del proceso creativo.',
-        photos: [],
-        createdAt: new Date().toISOString(),
-      },
-    ];
-    savePosts();
+function textToBase64(text) {
+  const bytes = new TextEncoder().encode(text);
+  let binary = '';
+
+  bytes.forEach((byte) => {
+    binary += String.fromCharCode(byte);
+  });
+
+  return btoa(binary);
+}
+
+function base64ToText(base64Value) {
+  const cleanBase64 = (base64Value || '').replace(/\n/g, '');
+  const binary = atob(cleanBase64);
+  const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+  return new TextDecoder().decode(bytes);
+}
+
+function buildGitHubHeaders() {
+  return {
+    Authorization: `token ${TOKEN}`,
+    'Content-Type': 'application/json',
+  };
+}
+
+async function fetchPostsFileFromGitHub() {
+  const response = await fetch(`${GITHUB_CONTENTS_URL}?ref=${BRANCH}`, {
+    method: 'GET',
+    headers: buildGitHubHeaders(),
+  });
+
+  if (response.status === 404) {
+    return null;
+  }
+
+  if (!response.ok) {
+    throw new Error(`No se pudo leer posts.json (${response.status}).`);
+  }
+
+  return response.json();
+}
+
+async function loadPosts() {
+  isLoading.value = true;
+  syncError.value = '';
+
+  try {
+    const fileData = await fetchPostsFileFromGitHub();
+
+    if (!fileData) {
+      posts.value = createDefaultPosts();
+      await savePosts();
+      return;
+    }
+
+    const jsonText = base64ToText(fileData.content);
+    const parsedPosts = JSON.parse(jsonText);
+
+    posts.value = Array.isArray(parsedPosts) ? parsedPosts : [];
+  } catch (error) {
+    console.error(error);
+    syncError.value = 'No se pudieron cargar las publicaciones.';
+    postError.value = 'Error al cargar publicaciones desde GitHub.';
+    posts.value = [];
+  } finally {
+    isLoading.value = false;
   }
 }
 
-function savePosts() {
-  localStorage.setItem(POSTS_STORAGE_KEY, JSON.stringify(posts.value));
+async function savePosts() {
+  isLoading.value = true;
+  syncError.value = '';
+
+  try {
+    const fileData = await fetchPostsFileFromGitHub();
+    const content = textToBase64(JSON.stringify(posts.value, null, 2));
+
+    const body = {
+      message: 'update newsletter posts',
+      content,
+      branch: BRANCH,
+    };
+
+    if (fileData?.sha) {
+      body.sha = fileData.sha;
+    }
+
+    const response = await fetch(GITHUB_CONTENTS_URL, {
+      method: 'PUT',
+      headers: buildGitHubHeaders(),
+      body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+      throw new Error(`No se pudo guardar posts.json (${response.status}).`);
+    }
+  } catch (error) {
+    console.error(error);
+    syncError.value = 'No se pudieron guardar las publicaciones.';
+    postError.value = 'Error al guardar publicaciones en GitHub.';
+    throw error;
+  } finally {
+    isLoading.value = false;
+  }
 }
 
 function loginAuthor() {
@@ -95,7 +199,7 @@ function removeUploadedPhoto(index) {
   uploadedPhotos.value.splice(index, 1);
 }
 
-function addPost() {
+async function addPost() {
   postError.value = '';
 
   if (!postForm.value.title.trim() || !postForm.value.note.trim()) {
@@ -103,22 +207,37 @@ function addPost() {
     return;
   }
 
-  posts.value.push({
+  const newPost = {
     id: Date.now(),
     title: postForm.value.title.trim(),
     note: postForm.value.note.trim(),
     photos: [...uploadedPhotos.value],
     createdAt: new Date().toISOString(),
-  });
+  };
 
-  postForm.value = { title: '', note: '' };
-  uploadedPhotos.value = [];
-  savePosts();
+  const previousPosts = [...posts.value];
+  posts.value.push(newPost);
+
+  try {
+    await savePosts();
+    postForm.value = { title: '', note: '' };
+    uploadedPhotos.value = [];
+  } catch {
+    posts.value = previousPosts;
+  }
 }
 
-function deletePost(postId) {
+async function deletePost(postId) {
+  postError.value = '';
+
+  const previousPosts = [...posts.value];
   posts.value = posts.value.filter((post) => post.id !== postId);
-  savePosts();
+
+  try {
+    await savePosts();
+  } catch {
+    posts.value = previousPosts;
+  }
 }
 
 function formatDate(date) {
@@ -129,6 +248,7 @@ function formatDate(date) {
   });
 }
 </script>
+
 
 <template>
   <header>
