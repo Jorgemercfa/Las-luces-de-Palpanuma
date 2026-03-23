@@ -1,17 +1,23 @@
 <template>
+  <div class="top-wrapper">
+    <h1>Octavio Miranda</h1>
+  </div>
   <nav class="navbar-area">
     <div class="link-style" :class="{ 'show-menu': menuOpen }">
       <router-link @click="closeMenu" to="/" class="text-navbar"
         >Inicio</router-link
       >
-      <router-link @click="closeMenu" to="/About-item" class="text-navbar"
-        >Historia</router-link
+      <router-link @click="closeMenu" to="/Author-item" class="text-navbar"
+        >Autor</router-link
       >
       <router-link @click="closeMenu" to="/Storie-item" class="text-navbar"
         >Libros</router-link
       >
-      <router-link @click="closeMenu" to="/Author-item" class="text-navbar"
-        >Autor</router-link
+      <router-link @click="closeMenu" to="/NewsLetter-item" class="text-navbar"
+        >Blog</router-link
+      >
+      <router-link @click="closeMenu" to="/Contact-item" class="text-navbar"
+        >Contacto</router-link
       >
       <router-link @click="closeMenu" to="/Sale-item" class="text-navbar"
         >Ventas</router-link
@@ -43,6 +49,13 @@ export default {
 /* ✅ NUEVO: Espaciado global para navbar sticky */
 html {
   scroll-padding-top: 80px;
+}
+
+.top-wrapper {
+  background: linear-gradient(90deg, #4e76a9, #4e76a9);
+  color: white;
+  text-align: center;
+  padding: 10px 0;
 }
 
 .navbar-area {
