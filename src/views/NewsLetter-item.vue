@@ -17,7 +17,9 @@ const loginError = ref('');
 const postError = ref('');
 
 const sortedPosts = computed(() =>
-  [...posts.value].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+  [...posts.value].sort(
+    (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+  ),
 );
 
 onMounted(() => {
@@ -35,8 +37,7 @@ function loadPosts() {
       {
         id: Date.now(),
         title: 'Bienvenidos al Newsletter',
-        note:
-          'Este espacio será usado para compartir avances del libro, notas del autor e imágenes exclusivas del proceso creativo.',
+        note: 'Este espacio será usado para compartir avances del libro, notas del autor e imágenes exclusivas del proceso creativo.',
         photos: [],
         createdAt: new Date().toISOString(),
       },
@@ -161,14 +162,18 @@ function formatDate(date) {
           />
         </div>
 
-        <button class="primary-btn" @click="loginAuthor">Ingresar como autor</button>
+        <button class="primary-btn" @click="loginAuthor">
+          Ingresar como autor
+        </button>
         <p v-if="loginError" class="error-text">{{ loginError }}</p>
       </div>
 
       <div class="author-panel" v-else>
         <div class="author-panel-header">
           <h2>Panel del autor</h2>
-          <button class="secondary-btn" @click="logoutAuthor">Cerrar sesión</button>
+          <button class="primary-btn" @click="logoutAuthor">
+            Cerrar sesión
+          </button>
         </div>
 
         <div class="form-grid">
@@ -186,7 +191,12 @@ function formatDate(date) {
 
         <label class="upload-label">
           Subir fotos
-          <input type="file" accept="image/*" multiple @change="handlePhotoUpload" />
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            @change="handlePhotoUpload"
+          />
         </label>
 
         <div class="preview-grid" v-if="uploadedPhotos.length">
@@ -202,7 +212,9 @@ function formatDate(date) {
           </div>
         </div>
 
-        <button class="primary-btn" @click="addPost">Publicar newsletter</button>
+        <button class="primary-btn" @click="addPost">
+          Publicar newsletter
+        </button>
         <p v-if="postError" class="error-text">{{ postError }}</p>
       </div>
 
@@ -265,7 +277,8 @@ function formatDate(date) {
 .author-box,
 .author-panel,
 .post-card {
-  background: #ffffff;
+  background: #4e76a9;
+  color: #fff;
   border-radius: 16px;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
   padding: 24px;
@@ -275,6 +288,7 @@ function formatDate(date) {
 .author-panel-header,
 .post-header {
   display: flex;
+  color: #fff;
   justify-content: space-between;
   align-items: center;
   gap: 12px;
@@ -300,6 +314,7 @@ textarea {
   display: inline-flex;
   flex-direction: column;
   gap: 8px;
+  border-radius: 8px;
   margin-bottom: 16px;
 }
 
@@ -320,8 +335,6 @@ textarea {
 }
 
 .post-date {
-  margin: 0;
-  color: #666;
   font-size: 0.9rem;
 }
 
@@ -330,7 +343,6 @@ textarea {
 }
 
 .primary-btn,
-.secondary-btn,
 .danger-btn {
   border: none;
   border-radius: 8px;
@@ -340,12 +352,8 @@ textarea {
 }
 
 .primary-btn {
-  background-color: #4e76a9;
-  color: #fff;
-}
-
-.secondary-btn {
-  background-color: #ebebeb;
+  background-color: #1c4e99;
+  color: #ffffff;
 }
 
 .danger-btn {
