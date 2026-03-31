@@ -7,13 +7,17 @@ const AUTHOR_USER = 'octavio';
 const AUTHOR_PASSWORD = 'Palpanuma2026';
 const SESSION_STORAGE_KEY = 'palpanuma-newsletter-author';
 
-const GITHUB_USER = '<my-github-username>';
-const GITHUB_REPO = '<my-repo>';
+const GITHUB_USER = process.env.VUE_APP_GITHUB_USER || '';
+const GITHUB_REPO = process.env.VUE_APP_GITHUB_REPO || '';
 const FILE_PATH = 'public/posts.json';
-const BRANCH = 'main';
-const TOKEN = '<github-token>';
+const BRANCH = process.env.VUE_APP_GITHUB_BRANCH || 'main';
+const TOKEN = process.env.VUE_APP_GITHUB_TOKEN || '';
+const LOCAL_STORAGE_KEY = 'palpanuma-newsletter-posts';
 
 const GITHUB_CONTENTS_URL = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${FILE_PATH}`;
+const canSyncWithGitHub = computed(
+  () => Boolean(GITHUB_USER && GITHUB_REPO && TOKEN),
+);
 
 const loginForm = ref({ user: '', password: '' });
 const postForm = ref({ title: '', note: '' });
@@ -73,7 +77,30 @@ function buildGitHubHeaders() {
   };
 }
 
+function savePostsToLocalStorage() {
+  localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(posts.value));
+}
+
+function loadPostsFromLocalStorage() {
+  const savedPosts = localStorage.getItem(LOCAL_STORAGE_KEY);
+
+  if (!savedPosts) {
+    return null;
+  }
+
+  try {
+    const parsed = JSON.parse(savedPosts);
+    return Array.isArray(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
 async function fetchPostsFileFromGitHub() {
+  if (!canSyncWithGitHub.value) {
+    return null;
+  }
+
   const response = await fetch(`${GITHUB_CONTENTS_URL}?ref=${BRANCH}`, {
     method: 'GET',
     headers: buildGitHubHeaders(),
@@ -95,6 +122,21 @@ async function loadPosts() {
   syncError.value = '';
 
   try {
+    const localPosts = loadPostsFromLocalStorage();
+
+    if (localPosts) {
+      posts.value = localPosts;
+    }
+
+    if (!canSyncWithGitHub.value) {
+      if (!localPosts) {
+        posts.value = createDefaultPosts();
+        savePostsToLocalStorage();
+      }
+
+      return;
+    }
+
     const fileData = await fetchPostsFileFromGitHub();
 
     if (!fileData) {
@@ -107,11 +149,14 @@ async function loadPosts() {
     const parsedPosts = JSON.parse(jsonText);
 
     posts.value = Array.isArray(parsedPosts) ? parsedPosts : [];
+    savePostsToLocalStorage();
   } catch (error) {
     console.error(error);
-    syncError.value = 'No se pudieron cargar las publicaciones.';
-    postError.value = 'Error al cargar publicaciones desde GitHub.';
-    posts.value = [];
+    syncError.value = 'No se pudieron cargar las publicaciones desde GitHub.';
+    postError.value = 'Se cargaron solo los datos locales por un error de GitHub.';
+
+    const localPosts = loadPostsFromLocalStorage();
+    posts.value = localPosts || [];
   } finally {
     isLoading.value = false;
   }
@@ -122,6 +167,13 @@ async function savePosts() {
   syncError.value = '';
 
   try {
+    savePostsToLocalStorage();
+
+    if (!canSyncWithGitHub.value) {
+      postError.value = '';
+      return;
+    }
+
     const fileData = await fetchPostsFileFromGitHub();
     const content = textToBase64(JSON.stringify(posts.value, null, 2));
 
@@ -146,8 +198,8 @@ async function savePosts() {
     }
   } catch (error) {
     console.error(error);
-    syncError.value = 'No se pudieron guardar las publicaciones.';
-    postError.value = 'Error al guardar publicaciones en GitHub.';
+    syncError.value = 'No se pudieron guardar las publicaciones en GitHub.';
+    postError.value = 'Publicación guardada localmente. Revisa tu configuración de GitHub.';
     throw error;
   } finally {
     isLoading.value = false;
@@ -262,6 +314,7 @@ function formatDate(date) {
         Aquí se publican notas, avances y fotos del proceso creativo de
         <strong>Las luces de Palpanuma</strong>.
       </p>
+      <p v-if="syncError" class="warning-text">{{ syncError }}</p>
 
       <div class="author-box" v-if="!isAuthor">
         <h2>Acceso de autor</h2>
@@ -484,6 +537,11 @@ textarea {
 .error-text {
   color: #b92d2d;
   margin-top: 10px;
+}
+
+.warning-text {
+  color: #8a5a00;
+  margin-bottom: 16px;
 }
 
 @media (max-width: 700px) {
