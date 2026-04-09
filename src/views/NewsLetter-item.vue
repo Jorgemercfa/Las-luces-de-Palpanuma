@@ -28,6 +28,7 @@ const isLoading = ref(false);
 const loginError = ref('');
 const postError = ref('');
 const syncError = ref('');
+const showLoginForm = ref(false);
 
 const sortedPosts = computed(() =>
   [...posts.value].sort(
@@ -316,7 +317,15 @@ function formatDate(date) {
       </p>
       <p v-if="syncError" class="warning-text">{{ syncError }}</p>
 
-      <div class="author-box" v-if="!isAuthor">
+      <!-- Botón para mostrar/ocultar el formulario de autor -->
+      <div v-if="!isAuthor" class="author-toggle-wrapper">
+        <button class="toggle-login-btn" @click="showLoginForm = !showLoginForm">
+          {{ showLoginForm ? 'Cancelar' : '🔒 Acceso de autor' }}
+        </button>
+      </div>
+
+      <!-- Formulario de acceso, oculto por defecto -->
+      <div class="author-box" v-if="!isAuthor && showLoginForm">
         <h2>Acceso de autor</h2>
         <p>Solo el autor puede crear, editar o eliminar contenido.</p>
 
@@ -341,7 +350,7 @@ function formatDate(date) {
         <p v-if="loginError" class="error-text">{{ loginError }}</p>
       </div>
 
-      <div class="author-panel" v-else>
+      <div class="author-panel" v-if="isAuthor">
         <div class="author-panel-header">
           <h2>Panel del autor</h2>
           <button class="primary-btn" @click="logoutAuthor">
@@ -550,5 +559,26 @@ textarea {
     flex-direction: column;
     align-items: flex-start;
   }
+}
+
+.author-toggle-wrapper {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 12px;
+}
+
+.toggle-login-btn {
+  background: transparent;
+  border: none;
+  color: #888;
+  font-size: 0.82rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: color 0.2s;
+}
+
+.toggle-login-btn:hover {
+  color: #444;
 }
 </style>
