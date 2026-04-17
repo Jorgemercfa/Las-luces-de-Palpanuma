@@ -15,8 +15,8 @@ const TOKEN = process.env.VUE_APP_GITHUB_TOKEN || '';
 const LOCAL_STORAGE_KEY = 'palpanuma-newsletter-posts';
 
 const GITHUB_CONTENTS_URL = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${FILE_PATH}`;
-const canSyncWithGitHub = computed(
-  () => Boolean(GITHUB_USER && GITHUB_REPO && TOKEN),
+const canSyncWithGitHub = computed(() =>
+  Boolean(GITHUB_USER && GITHUB_REPO && TOKEN),
 );
 
 const loginForm = ref({ user: '', password: '' });
@@ -28,6 +28,7 @@ const isLoading = ref(false);
 const loginError = ref('');
 const postError = ref('');
 const syncError = ref('');
+const showLoginForm = ref(false);
 
 const sortedPosts = computed(() =>
   [...posts.value].sort(
@@ -153,7 +154,8 @@ async function loadPosts() {
   } catch (error) {
     console.error(error);
     syncError.value = 'No se pudieron cargar las publicaciones desde GitHub.';
-    postError.value = 'Se cargaron solo los datos locales por un error de GitHub.';
+    postError.value =
+      'Se cargaron solo los datos locales por un error de GitHub.';
 
     const localPosts = loadPostsFromLocalStorage();
     posts.value = localPosts || [];
@@ -199,7 +201,8 @@ async function savePosts() {
   } catch (error) {
     console.error(error);
     syncError.value = 'No se pudieron guardar las publicaciones en GitHub.';
-    postError.value = 'Publicación guardada localmente. Revisa tu configuración de GitHub.';
+    postError.value =
+      'Publicación guardada localmente. Revisa tu configuración de GitHub.';
     throw error;
   } finally {
     isLoading.value = false;
@@ -301,7 +304,6 @@ function formatDate(date) {
 }
 </script>
 
-
 <template>
   <header>
     <navbar />
@@ -316,7 +318,18 @@ function formatDate(date) {
       </p>
       <p v-if="syncError" class="warning-text">{{ syncError }}</p>
 
-      <div class="author-box" v-if="!isAuthor">
+      <!-- Botón para mostrar/ocultar el formulario de autor -->
+      <div v-if="!isAuthor" class="author-toggle-wrapper">
+        <button
+          class="toggle-login-btn"
+          @click="showLoginForm = !showLoginForm"
+        >
+          {{ showLoginForm ? 'Cancelar' : '🔒 Acceso de autor' }}
+        </button>
+      </div>
+
+      <!-- Formulario de acceso, oculto por defecto -->
+      <div class="author-box" v-if="!isAuthor && showLoginForm">
         <h2>Acceso de autor</h2>
         <p>Solo el autor puede crear, editar o eliminar contenido.</p>
 
@@ -341,7 +354,7 @@ function formatDate(date) {
         <p v-if="loginError" class="error-text">{{ loginError }}</p>
       </div>
 
-      <div class="author-panel" v-else>
+      <div class="author-panel" v-if="isAuthor">
         <div class="author-panel-header">
           <h2>Panel del autor</h2>
           <button class="primary-btn" @click="logoutAuthor">
@@ -550,5 +563,26 @@ textarea {
     flex-direction: column;
     align-items: flex-start;
   }
+}
+
+.author-toggle-wrapper {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 12px;
+}
+
+.toggle-login-btn {
+  background: transparent;
+  border: none;
+  color: #888;
+  font-size: 0.82rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: color 0.2s;
+}
+
+.toggle-login-btn:hover {
+  color: #444;
 }
 </style>
