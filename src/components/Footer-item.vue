@@ -9,7 +9,7 @@ const year = new Date().getFullYear();
       <div class="contact-footer">
         <h4 class="titile-footer">Contacto</h4>
         <div class="footer-text">
-          <div>ejemplo@grmail.pe</div>
+          <div>octaviomiranda.libros@gmail.com</div>
         </div>
       </div>
       <div class="social-media">
@@ -23,13 +23,13 @@ const year = new Date().getFullYear();
             <i class="pi pi-instagram"></i>
           </a>
 
-          <a href="" target="_blank">
+          <!-- <a href="" target="_blank">
             <i class="pi pi-youtube"></i>
           </a>
 
           <a href="" target="_blank">
             <i class="pi pi-tiktok"></i>
-          </a>
+          </a> -->
         </div>
       </div>
     </div>
