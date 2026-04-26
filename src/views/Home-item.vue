@@ -9,11 +9,11 @@ import stories from '@/data/stories.js';
    CARRUSEL PRINCIPAL
 ============================= */
 
-import img1 from '@/assets/book_home_1.png';
-import img2 from '@/assets/book_home_2.png';
-import img3 from '@/assets/book_home_3.png';
+import img1 from '@/assets/Palpanuma publicaciones.jpg';
+// import img2 from '@/assets/book_home_2.png';
+// import img3 from '@/assets/book_home_3.png';
 
-const images = [img1, img2, img3];
+const images = [img1];
 
 const currentImageIndex = ref(0);
 const intervalId = ref(null);
@@ -66,12 +66,11 @@ onBeforeUnmount(() => {
     </div>
 
     <div class="text-home">
-      Nazca, una chica temerosa de catorce años que vive aislada en la inhóspita
+      <p class="main-text-home">Nazca,</p> una chica temerosa de catorce años que vive aislada en la inhóspita
       isla de Noribo, en el archipiélago ártico de Lyanangaia, se ve obligada a
       abandonar la seguridad de su hogar cuando ocurre un trágico suceso. Sin
-      experiencia en el mundo exterior, emprende un peligroso viaje por mar y
-      tierra en busca de las misteriosas luces de la montaña Palpanuma, sin
-      saber que una amenaza la sigue desde el momento en que partió.
+      conocer el mundo exterior, emprende un peligroso viaje por mar y
+      tierra en busca de las misteriosas luces de la montaña Palpanuma, pero lo que ella no sabe es que una amenaza la sigue desde el momento en que partió de casa.
     </div>
     <h1 class="title-home">Libros</h1>
     <div class="our-stories">
@@ -129,10 +128,17 @@ onBeforeUnmount(() => {
 .text-home {
   max-width: 900px;
   margin: 60px auto;
+  font-family: serif;
   text-align: center;
   font-size: 18px;
   line-height: 1.7;
 }
+
+.main-text-home{
+  color: #4e76a9;
+  font-size: 24px;
+}
+
 .our-stories {
   width: 100%;
   background: linear-gradient(135deg, #4e76a9, #456a9a);
@@ -146,8 +152,8 @@ onBeforeUnmount(() => {
 }
 
 .card-icons {
-  width: 90px;
-  height: 90px;
+  /* width: 90px; */
+  height: 140px;
   background-color: white;
   border-radius: 30%;
   object-fit: contain;

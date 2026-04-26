@@ -11,9 +11,9 @@ import Footer from '@/components/Footer-item.vue'
   <div class="illustration-area">
     <h1 class="title-illustration">Ilustraciones</h1>
     <div class="illustration-container">
-    <img src="@/assets/book_home_1.png" alt="Ilustración 1" class="illustration-image" />
-    <img src="@/assets/book_home_2.png" alt="Ilustración 2" class="illustration-image" />
-    <img src="@/assets/book_home_3.png" alt="Ilustración 3" class="illustration-image" />
+    <img src="@/assets/6.jpg" alt="Ilustración 1" class="illustration-image" />
+    <img src="@/assets/7.jpg" alt="Ilustración 2" class="illustration-image" />
+    <img src="@/assets/8.jpg" alt="Ilustración 3" class="illustration-image" />
     </div>
   </div>
   <footer>
@@ -75,7 +75,7 @@ import Footer from '@/components/Footer-item.vue'
 
 .illustration-image {
   width: 100%;
-  height: 400px;
+  height: 500px;
   border-radius: 14px;
 }
 
