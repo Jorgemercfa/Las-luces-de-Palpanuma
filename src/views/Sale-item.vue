@@ -14,7 +14,7 @@ import Footer from '@/components/Footer-item.vue';
     <div class="sale-space">
       <!-- DIGITAL -->
       <div class="card">
-        <h2>📱 Formato Digital</h2>
+        <h2>📱 E-book</h2>
         <p>Encuentra los libros en:</p>
 
         <a
@@ -35,11 +35,17 @@ import Footer from '@/components/Footer-item.vue';
         </a>
       </div>
 
-      <!-- IMPRESO -->
+      <!-- IMPRESO  -->
       <div class="card">
-        <h2>📚 Formato Impreso</h2>
+        <h2>📚 Libro en físico</h2>
         <p>Puedes obtenerlos escribiendo al siguente numero:</p>
-        <p>+51 941 491 849</p>
+        <a
+          href="https://wa.me/51941491849"
+          target="_blank"
+          class="btn"
+        >
+          WhatsApp      
+        </a>
       </div>
     </div>
   </main>
