@@ -17,7 +17,7 @@ import Footer from '@/components/Footer-item.vue';
           <!-- FORMULARIO -->
           <form
             class="form-area"
-            action="https://formsubmit.co/cokijlmf@gmail.com"
+            action="https://formsubmit.co/octaviomiranda.libros@gmail.com"
             method="POST"
           >
             <div class="form-group">
@@ -40,8 +40,8 @@ import Footer from '@/components/Footer-item.vue';
           <!-- INFORMACIÓN -->
           <div class="contact-info">
             <h2>Información de contacto</h2>
-            <p><strong>Celular:</strong> 999 999 999</p>
-            <p><strong>Correo:</strong> ejemplo@gmail.com</p>
+            <p><strong>Celular:</strong> +51 941 491 849</p>
+            <p><strong>Correo:</strong> octaviomiranda.libros@gmail.com</p>
           </div>
         </div>
       </div>
@@ -149,7 +149,7 @@ import Footer from '@/components/Footer-item.vue';
 }
 
 .submit-btn:hover {
-  background-color: #2e8f12;
+  background-color: #4e76a9;
   transform: translateY(-2px);
 }
 
