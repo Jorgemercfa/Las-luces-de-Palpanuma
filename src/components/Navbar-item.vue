@@ -1,6 +1,6 @@
 <template>
   <div class="top-wrapper">
-    <h1>Octavio Miranda</h1>
+    <h1 class="title-web">Octavio Miranda</h1>
   </div>
   <nav class="navbar-area">
     <div class="link-style" :class="{ 'show-menu': menuOpen }">
@@ -62,6 +62,13 @@ html {
   color: white;
   text-align: center;
   padding: 10px 0;
+}
+
+.title-web {
+  font-size: 50px;
+  font-weight: 50;
+  margin: 0;
+  font-family: serif;
 }
 
 .navbar-area {
