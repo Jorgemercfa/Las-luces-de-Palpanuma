@@ -20,7 +20,7 @@ export default [
           acechando desde el primer día que partió de su hogar.
     `,
     image: require('@/assets/book_home_1.png'),
-    image2: require('@/assets/homeimg1.png'),
+    image2: require('@/assets/7.jpg'),
     details_button: 'Detalles',
   },
   // {
