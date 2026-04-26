@@ -126,8 +126,6 @@ import Footer from '@/components/Footer-item.vue';
   width: 220px;
   height: 220px;
   object-fit: cover;
-  border-radius: 50%;
-  border: 4px solid #ffffff;
 }
 
 /* =========================
