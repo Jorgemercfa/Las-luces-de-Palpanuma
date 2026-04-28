@@ -8,19 +8,39 @@ import Footer from '@/components/Footer-item.vue';
       <navbar />
     </header>
     <div class="media-container">
-        <h1 class="title">Medios de Comunicación</h1>
+        <h1 class="title">Medios</h1>
         <div class="media-content">
-            <p>Podrás encontrar entrevistas, reseñas y más contenido relacionado con el libro en esta sección. ¡Mantente atento para descubrir todo lo que tenemos preparado!</p>
+            <p>Podrás encontrar entrevistas, reseñas y más contenido relacionado con el libro en esta sección.</p>
         </div>
-    <div class="video-container">
+    <div class="media-content">
+        <h2>Entrevista en Publishers Magazine</h2>
+        <div class="video-container">
         <iframe 
-    src="https://www.youtube.com/embed/i1Pu6UoLE2s" 
-    frameborder="0" 
-    allowfullscreen
-    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
-  </iframe>
+            src="https://www.youtube.com/embed/i1Pu6UoLE2s" 
+            frameborder="0" 
+            allowfullscreen
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
+         </iframe>
     </div>
+    <div class="media-content">
+        <p>En este entrevista con Publishers Magazine, Octavio Miranda comparte detalles sobre su proceso creativo y la inspiración detrás de "Las luces de Palpanuma". Escucha la entrevista completa para conocer más sobre el autor y su obra.</p>  
+    </div>
+    </div>
+    <div class="media-content">
   
+  <div class="resena-destacada">
+    <h2>Reseña en Publishers Magazine</h2>
+    <p class="resena-meta">Publishers nº 67 · Octubre 2025 · Sección: Las reseñas de Publishers</p>
+    
+    <blockquote>
+      "La novela, concebida para un público juvenil, trasciende sin embargo las fronteras de la literatura de aventuras y se acaba convirtiendo en una fábula sobre la madurez, el miedo y la valentía."
+    </blockquote>
+    
+    <p>
+    Octavio Miranda presenta en la editorial Caligrama una propuesta de notable densidad simbólica y estética titulada <em>Las luces de Palpanuma</em>. La revista especializada Publishers, en su número 67, destaca cómo la obra construye un universo narrativo donde el viaje físico se funde con una profunda búsqueda interior. La crítica resalta el tono audiovisual y cinematográfico del relato, apoyado en una prosa lírica que explora temas universales como el coraje frente a la adversidad.
+    </p>
+  </div>
+</div>
     </div>
     <footer>
       <Footer />
@@ -31,7 +51,7 @@ import Footer from '@/components/Footer-item.vue';
 
 .media-container {
   max-width: 1100px;
-  margin: 0 auto;
+  margin: 60px auto;
   padding: 0 6%;
 }
 
@@ -57,6 +77,7 @@ import Footer from '@/components/Footer-item.vue';
   margin-top: 40px;
   font-size: 1.1rem;
   line-height: 1.6;
+  margin-bottom: 20px;
 }
 
 .video-container {
@@ -77,6 +98,29 @@ import Footer from '@/components/Footer-item.vue';
   left: 0;
   top: 0;
   border: none;
+}
+
+.resena-destacada {
+  margin-top: 40px;
+  padding: 30px;
+  border-left: 4px solid #4e76a9;
+  background-color: #f9f9f9;
+  border-radius: 0 8px 8px 0;
+}
+
+.resena-meta {
+  font-size: 0.9rem;
+  color: #888;
+  margin-bottom: 20px;
+  font-style: italic;
+}
+
+blockquote {
+  font-size: 1.15rem;
+  line-height: 1.7;
+  color: #4e76a9;
+  font-style: italic;
+  margin: 0 0 20px 0;
 }
 
 </style>
