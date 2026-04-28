@@ -5,6 +5,7 @@ import AuthorItem from './views/Author-item.vue';
 import stories from './views/Storie-item.vue';
 import NewsLetter from './views/NewsLetter-item.vue';
 import IllustrationItem from './views/Illustration-item.vue';
+import MediaItem from './views/Media-item.vue';
 import Contact from './views/Contact-item.vue';
 import Sale from './views/Sale-item.vue';
 import storieDetails from './components/Component-stories-item.vue';
@@ -18,6 +19,11 @@ const routes = [
     path: '/Illustration-item',
     name: 'Illustration',
     component: IllustrationItem,
+  },
+  {
+    path: '/Media-item',  
+    name: 'Media',
+    component: MediaItem,
   },
   { path: '/Contact-item', name: 'Contact', component: Contact },
   { path: '/Sale-item', name: 'sale-item', component: Sale },

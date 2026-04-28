@@ -22,6 +22,9 @@
         class="text-navbar"
         >Ilustraciones</router-link
       >
+      <router-link @click="closeMenu" to="/Media-item" class="text-navbar"
+        >Medios</router-link
+      >
       <router-link @click="closeMenu" to="/Contact-item" class="text-navbar"
         >Contacto</router-link
       >
