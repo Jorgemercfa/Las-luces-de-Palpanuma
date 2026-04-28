@@ -22,7 +22,7 @@ import Footer from '@/components/Footer-item.vue';
         <div class="author-image-container">
           <img
             class="author-image"
-            src="@/assets/autorimg.png"
+            src="@/assets/autorimg.jpeg"
             alt="Foto de Octavio Miranda"
           />
         </div>
@@ -31,15 +31,7 @@ import Footer from '@/components/Footer-item.vue';
           <h2 class="author-name">Octavio Miranda</h2>
 
           <p class="biography">
-            Octavio Miranda (Lima, 2000). La empecé en Lima en el 2020, dos años
-            más tarde, la retomé en Canadá en el 2022 y, un año después, la
-            acabé en Utah en el 2023, y todo esto para luego volverla a escribir
-            completa en Lima en el 2024, debido a que, por fin, descubrí su
-            verdadero significado, y valió la pena absoluta hacerlo. Pasaron
-            unos meses y, después de tanto esfuerzo e intenso desgaste, la
-            terminé, de nuevo, y para siempre, en Utah este 2025 y el resultado
-            final es de las cosas más conmovedoras y mágicas que me ha pasado en
-            la vida.
+            Octavio Miranda Chiappe nació en Lima, Perú, en el año 2000. Desde muy pequeño mostró interés por la historia, la naturaleza y las artes, principalmente, el cine y la literatura. Por ello, se ha dedicado a escribir guiones, cuentos y novelas desde los ocho años hasta el día de hoy, donde ya es graduado de la Universidad de Lima en Comunicación con enfoque en periodismo y audiovisuales, y esta novela, Las luces de Palpanuma, es su primer libro publicado.
           </p>
         </div>
       </div>
@@ -123,9 +115,8 @@ import Footer from '@/components/Footer-item.vue';
 }
 
 .author-image {
-  width: 220px;
-  height: 220px;
-  object-fit: cover;
+  width: 250px;
+  height: 380px;
 }
 
 /* =========================
