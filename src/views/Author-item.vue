@@ -166,7 +166,7 @@ import Footer from '@/components/Footer-item.vue';
 
   .author-image {
     width: 180px;
-    height: 180px;
+    height: 250px;
   }
 
   .title {

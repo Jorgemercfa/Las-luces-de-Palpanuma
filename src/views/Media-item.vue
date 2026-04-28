@@ -123,4 +123,15 @@ blockquote {
   margin: 0 0 20px 0;
 }
 
+@media (max-width: 900px) {
+  .media-container {
+    padding: 0 4%;
+  }
+
+  .video-container {
+    max-width: 100%;
+    height: 300px;
+  }
+}
+
 </style>

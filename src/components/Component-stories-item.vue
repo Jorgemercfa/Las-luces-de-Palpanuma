@@ -71,7 +71,7 @@ watch(
 
   <main class="container">
     <div v-if="storie" class="storie-wrapper">
-      <router-link to="/stories-item" class="return-area">
+      <router-link to="/Storie-item" class="return-area">
         <button class="card-button">Regresar</button>
       </router-link>
 
@@ -202,4 +202,17 @@ watch(
   font-size: 1.2rem;
   color: #666;
 }
+
+@media (max-width: 900px) {
+  .storie-image-details {
+    width: 100%;
+    height: auto;
+  }
+
+  .text-storie-type {
+    max-width: 100%;
+    padding: 0 10px;
+  }
+}
+
 </style>

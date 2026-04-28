@@ -154,7 +154,6 @@ onBeforeUnmount(() => {
 .card-icons {
   /* width: 90px; */
   height: 140px;
-  background-color: white;
   border-radius: 30%;
   object-fit: contain;
   margin-bottom: 20px;
@@ -306,9 +305,7 @@ onBeforeUnmount(() => {
   }
 
   .card-icons {
-    width: 65px;
     height: 65px;
-    padding: 14px;
   }
 
   /* ===============================
@@ -343,8 +340,7 @@ onBeforeUnmount(() => {
   }
 
   .card-icons {
-    width: 55px;
-    height: 55px;
+    height: 80px;
   }
 
   .customer-icons {
