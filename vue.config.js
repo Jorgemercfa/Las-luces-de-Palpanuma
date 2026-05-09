@@ -2,7 +2,7 @@ const { defineConfig } = require('@vue/cli-service');
 
 module.exports = defineConfig({
   transpileDependencies: true,
-  publicPath: '/',
+  publicPath: '/', // Asegura que las rutas sean relativas a la raíz del proyecto
 
   chainWebpack: (config) => {
     config.plugin('html').tap((args) => {
