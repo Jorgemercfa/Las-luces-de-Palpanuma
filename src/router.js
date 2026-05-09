@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router';
+import { createRouter, createWebHashHistory } from 'vue-router';
 
 import Home from './views/Home-item.vue';
 import AuthorItem from './views/Author-item.vue';
@@ -32,7 +32,7 @@ const routes = [
 ];
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHashHistory(),
   routes,
   scrollBehavior(to, from, savedPosition) {
     // ✅ MEJORADO: Mejor scrollBehavior
