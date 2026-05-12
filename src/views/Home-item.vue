@@ -164,11 +164,14 @@ onBeforeUnmount(() => {
   min-height: 220px;
   background-color: #1c4e99;
   border-radius: 16px;
+  display: flex;                  /* ← Agrega esto */
+  flex-direction: column;         /* ← Agrega esto */
+  align-items: center;
   text-align: center;
   color: #ffffff;
   padding: 20px;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  text-decoration: none; /* quita el subrayado */
+  text-decoration: none;
 }
 
 .logs-item:hover {

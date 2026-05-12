@@ -19,7 +19,7 @@ export default [
           montaña llamada Palpanuma, sin saber que un latente peligro la estaría
           acechando desde el primer día que partió de su hogar.
     `,
-    image: require('@/assets/book_home_1.png'),
+    image: require('@/assets/Nazca_Portada.jpeg'),
     image2: require('@/assets/7.jpg'),
     details_button: 'Detalles',
   },

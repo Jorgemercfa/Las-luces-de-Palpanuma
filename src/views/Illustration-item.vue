@@ -14,6 +14,7 @@ import Footer from '@/components/Footer-item.vue'
     <img src="@/assets/6.jpg" alt="Ilustración 1" class="illustration-image" />
     <img src="@/assets/7.jpg" alt="Ilustración 2" class="illustration-image" />
     <img src="@/assets/8.jpg" alt="Ilustración 3" class="illustration-image" />
+    <img src="@/assets/Nazca_Portada.jpeg" alt="Ilustración 4" class="illustration-image" />
     </div>
   </div>
   <footer>
