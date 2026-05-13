@@ -145,7 +145,7 @@ watch(
 }
 
 .storie-image-details {
-  width: 600px;
+  width: 500px;
   height: 800px;
   border-radius: 14px;
   margin-bottom: 30px;
