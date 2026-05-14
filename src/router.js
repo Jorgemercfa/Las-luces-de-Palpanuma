@@ -119,13 +119,13 @@ router.afterEach((to) => {
 
   document.title = to.meta.title || defaultTitle;
 
-  let descriptionTag = document.querySelector('meta[name="description"]');
-  if (!descriptionTag) {
-    descriptionTag = document.createElement('meta');
-    descriptionTag.setAttribute('name', 'description');
-    document.head.appendChild(descriptionTag);
+  let metaDescription = document.querySelector('meta[name="description"]');
+  if (!metaDescription) {
+    metaDescription = document.createElement('meta');
+    metaDescription.setAttribute('name', 'description');
+    document.head.appendChild(metaDescription);
   }
-  descriptionTag.setAttribute('content', to.meta.description || defaultDescription);
+  metaDescription.setAttribute('content', to.meta.description || defaultDescription);
 });
 
 export default router;
