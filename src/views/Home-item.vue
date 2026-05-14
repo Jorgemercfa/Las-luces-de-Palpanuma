@@ -66,11 +66,8 @@ onBeforeUnmount(() => {
     </div>
 
     <div class="text-home">
-      <p class="main-text-home">Nazca,</p> una chica temerosa de catorce años que vive aislada en la inhóspita
-      isla de Noribo, en el archipiélago ártico de Lyanangaia, se ve obligada a
-      abandonar la seguridad de su hogar cuando ocurre un trágico suceso. Sin
-      conocer el mundo exterior, emprende un peligroso viaje por mar y
-      tierra en busca de las misteriosas luces de la montaña Palpanuma, pero lo que ella no sabe es que una amenaza la sigue desde el momento en que partió de casa.
+      <p class="main-text-home">Nazca Ocarina,</p>Es una chica temerosa de catorce años que vive aislada del mundo en la isla de Noribo, una tierra perdida dentro de un archipiélago en el Ártico. A pesar de sus intensos miedos, vivía segura con sus papás. Hasta que un día, una tragedía azotará su vida por completo, obligandola a abandonar la seguridad y paz de su hogar a la fuerza. Sin haber puesto nunca un pie en el exterior, emprende sola un peligroso viaje a través del archipiélago, cruzando mar y tierra, en busca de las misteriosas luces de la montaña Palpanuma como última esperanza para arreglar lo ocurrido.
+Lo que ella no sabe es que un gran peligro la estará acechando desde el primer momento que partió de casa.
     </div>
     <h1 class="title-home">Libros</h1>
     <div class="our-stories">
