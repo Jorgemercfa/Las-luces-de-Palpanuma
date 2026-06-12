@@ -1,87 +1,24 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
   <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="description"
-    content="Nazca, una chica de catorce años, emprende un peligroso viaje en busca de las misteriosas luces de la montaña Palpanuma.">
-  <meta property="og:title" content="Octavio Miranda">
-  <meta property="og:description"
-    content="Nazca, una chica de catorce años, emprende un peligroso viaje en busca de las misteriosas luces de la montaña Palpanuma.">
-  <meta property="og:url" content="https://octaviomiranda.com/">
-  <meta property="og:type" content="website">
-  <link rel="canonical" href="https://octaviomiranda.com/">
-  <link rel="icon" href="<%= BASE_URL %>favicon.ico">
+  <script type="text/javascript">
+    // Single Page Apps for GitHub Pages
+    // https://github.com/rafgraph/spa-github-pages
+    // Este script convierte la URL de una ruta 404 en un redirect
+    // que preserva el path y lo pasa como query string a index.html
+    var pathSegmentsToKeep = 0;
 
-  <!-- Fuente moderna 2026 -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-  <title>
-    <%= htmlWebpackPlugin.options.title %>
-  </title>
-
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    html,
-    body {
-      width: 100%;
-      height: 100%;
-      overflow-x: hidden;
-
-      /* AQUÍ se aplica la fuente */
-      font-family: serif;
-
-      /* Mejora renderizado */
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-
-      font-size: 16px;
-      line-height: 1.6;
-      color: #111111;
-      background-color: #ffffff;
-    }
-
-    #app {
-      width: 100%;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    h1,
-    h2,
-    h3,
-    h4,
-    h5,
-    h6 {
-      font-weight: 700;
-      letter-spacing: -0.5px;
-    }
-
-    p {
-      font-weight: 400;
-      line-height: 1.8;
-    }
-  </style>
+    var l = window.location;
+    l.replace(
+      l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+      l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + '/?/' +
+      l.pathname.slice(1).split('/').slice(pathSegmentsToKeep).join('/').replace(/&/g, '~and~') +
+      (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
+      l.hash
+    );
+  </script>
 </head>
-
 <body>
-  <noscript>
-    <strong>
-      We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled. Please
-        enable it to continue.
-    </strong>
-  </noscript>
-
-  <div id="app"></div>
-  <!-- built files will be auto injected -->
 </body>
-
 </html>
