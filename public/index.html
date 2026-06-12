@@ -3,6 +3,21 @@
 
 <head>
   <meta charset="utf-8">
+  <!-- Start Single Page Apps for GitHub Pages -->
+  <script type="text/javascript">
+    (function(l) {
+      if (l.search[1] === '/' ) {
+        var decoded = l.search.slice(1).split('&').map(function(s) { 
+          return s.replace(/~and~/g, '&')
+        }).join('?');
+        window.history.replaceState(null, null,
+          l.pathname.slice(0, -1) + decoded + l.hash
+        );
+      }
+    }(window.location))
+  </script>
+  <!-- End Single Page Apps for GitHub Pages -->
+  <meta name="robots" content="index, follow">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="description"
@@ -12,7 +27,6 @@
     content="Nazca, una chica de catorce años, emprende un peligroso viaje en busca de las misteriosas luces de la montaña Palpanuma.">
   <meta property="og:url" content="https://octaviomiranda.com/">
   <meta property="og:type" content="website">
-  <link rel="canonical" href="https://octaviomiranda.com/">
   <link rel="icon" href="<%= BASE_URL %>favicon.ico">
 
   <!-- Fuente moderna 2026 -->
