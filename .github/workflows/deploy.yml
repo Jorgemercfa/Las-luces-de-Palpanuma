@@ -33,7 +33,7 @@ jobs:
           VUE_APP_GITHUB_USER: ${{ secrets.VUE_APP_GITHUB_USER }}
           VUE_APP_GITHUB_REPO: ${{ secrets.VUE_APP_GITHUB_REPO }}
           VUE_APP_GITHUB_BRANCH: ${{ secrets.VUE_APP_GITHUB_BRANCH }}
-          VUE_APP_GITHUB_TOKEN: ${{ secrets.VUE_APP_GITHUB_TOKEN }}
+          VUE_APP_NEWSLETTER_WORKER_URL: ${{ secrets.VUE_APP_NEWSLETTER_WORKER_URL }}
 
       - name: Copy index.html as 404.html
         # GitHub Pages serves 404.html for unknown routes; copy SPA shell so Vue Router handles deep links.

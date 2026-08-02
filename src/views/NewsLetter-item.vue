@@ -7,23 +7,35 @@ const AUTHOR_USER = 'octavio';
 const AUTHOR_PASSWORD = 'Palpanuma2026';
 const SESSION_STORAGE_KEY = 'palpanuma-newsletter-author';
 
+// Estos ya NO son secretos: solo se usan para leer el archivo público
+// posts.json directamente de GitHub. El token vive únicamente en el Worker.
 const GITHUB_USER = process.env.VUE_APP_GITHUB_USER || '';
 const GITHUB_REPO = process.env.VUE_APP_GITHUB_REPO || '';
+const GITHUB_BRANCH = process.env.VUE_APP_GITHUB_BRANCH || 'main';
 const FILE_PATH = 'public/posts.json';
-const BRANCH = process.env.VUE_APP_GITHUB_BRANCH || 'main';
-const TOKEN = process.env.VUE_APP_GITHUB_TOKEN || '';
+
+// URL del Cloudflare Worker que sí tiene el token de GitHub (oculto en su lado).
+const WORKER_URL = process.env.VUE_APP_NEWSLETTER_WORKER_URL || '';
+
 const LOCAL_STORAGE_KEY = 'palpanuma-newsletter-posts';
 
-const GITHUB_CONTENTS_URL = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${FILE_PATH}`;
-const canSyncWithGitHub = computed(() =>
-  Boolean(GITHUB_USER && GITHUB_REPO && TOKEN),
+const RAW_POSTS_URL = computed(
+  () =>
+    `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/${GITHUB_BRANCH}/${FILE_PATH}`,
 );
+
+const canReadFromGitHub = computed(() => Boolean(GITHUB_USER && GITHUB_REPO));
+const canWriteToGitHub = computed(() => Boolean(WORKER_URL));
 
 const loginForm = ref({ user: '', password: '' });
 const postForm = ref({ title: '', note: '' });
 const uploadedPhotos = ref([]);
 const posts = ref([]);
 const isAuthor = ref(false);
+// Guardamos la contraseña en memoria (no en localStorage) mientras dura la
+// sesión del autor, para poder autenticar cada guardado contra el Worker
+// sin pedirla de nuevo en cada publicación.
+const sessionAuthorPassword = ref('');
 const isLoading = ref(false);
 const loginError = ref('');
 const postError = ref('');
@@ -40,13 +52,14 @@ const sortedPosts = computed(() =>
 onMounted(async () => {
   isAuthor.value = sessionStorage.getItem(SESSION_STORAGE_KEY) === 'true';
 
-  // Avisa de inmediato si no hay sincronización configurada, para que
-  // no parezca que las publicaciones "desaparecen" en otros dispositivos.
-  if (!canSyncWithGitHub.value) {
+  if (!canReadFromGitHub.value) {
     syncWarning.value =
-      'La sincronización con GitHub no está configurada en este despliegue. ' +
-      'Las publicaciones que crees aquí solo se guardarán en este dispositivo/navegador ' +
-      'y no aparecerán en otros celulares o computadoras.';
+      'La sincronización no está configurada en este despliegue. ' +
+      'Las publicaciones solo se guardarán en este dispositivo/navegador.';
+  } else if (!canWriteToGitHub.value) {
+    syncWarning.value =
+      'La lectura de publicaciones está sincronizada, pero falta configurar ' +
+      'el Worker de publicación (VUE_APP_NEWSLETTER_WORKER_URL). No podrás publicar hasta configurarlo.';
   }
 
   await loadPosts();
@@ -62,31 +75,6 @@ function createDefaultPosts() {
       createdAt: new Date().toISOString(),
     },
   ];
-}
-
-function textToBase64(text) {
-  const bytes = new TextEncoder().encode(text);
-  let binary = '';
-
-  bytes.forEach((byte) => {
-    binary += String.fromCharCode(byte);
-  });
-
-  return btoa(binary);
-}
-
-function base64ToText(base64Value) {
-  const cleanBase64 = (base64Value || '').replace(/\n/g, '');
-  const binary = atob(cleanBase64);
-  const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
-  return new TextDecoder().decode(bytes);
-}
-
-function buildGitHubHeaders() {
-  return {
-    Authorization: `token ${TOKEN}`,
-    'Content-Type': 'application/json',
-  };
 }
 
 function savePostsToLocalStorage() {
@@ -108,15 +96,14 @@ function loadPostsFromLocalStorage() {
   }
 }
 
-async function fetchPostsFileFromGitHub() {
-  if (!canSyncWithGitHub.value) {
+async function fetchPostsFromGitHub() {
+  if (!canReadFromGitHub.value) {
     return null;
   }
 
-  const response = await fetch(`${GITHUB_CONTENTS_URL}?ref=${BRANCH}`, {
-    method: 'GET',
-    headers: buildGitHubHeaders(),
-  });
+  // Lectura pública y directa: no necesita token porque el repo es público
+  // y solo estamos leyendo, no escribiendo.
+  const response = await fetch(`${RAW_POSTS_URL.value}?t=${Date.now()}`);
 
   if (response.status === 404) {
     return null;
@@ -126,7 +113,8 @@ async function fetchPostsFileFromGitHub() {
     throw new Error(`No se pudo leer posts.json (${response.status}).`);
   }
 
-  return response.json();
+  const parsed = await response.json();
+  return Array.isArray(parsed) ? parsed : [];
 }
 
 async function loadPosts() {
@@ -140,85 +128,55 @@ async function loadPosts() {
       posts.value = localPosts;
     }
 
-    if (!canSyncWithGitHub.value) {
+    if (!canReadFromGitHub.value) {
       if (!localPosts) {
         posts.value = createDefaultPosts();
         savePostsToLocalStorage();
       }
-
       return;
     }
 
-    // Siempre que haya sincronización disponible, GitHub manda:
-    // así garantizamos que todos los dispositivos vean lo mismo.
-    const fileData = await fetchPostsFileFromGitHub();
+    const remotePosts = await fetchPostsFromGitHub();
 
-    if (!fileData) {
-      posts.value = createDefaultPosts();
-      await savePosts();
+    if (remotePosts === null) {
+      posts.value = localPosts || createDefaultPosts();
+      savePostsToLocalStorage();
       return;
     }
 
-    const jsonText = base64ToText(fileData.content);
-    const parsedPosts = JSON.parse(jsonText);
-
-    posts.value = Array.isArray(parsedPosts) ? parsedPosts : [];
+    posts.value = remotePosts;
     savePostsToLocalStorage();
   } catch (error) {
     console.error(error);
     syncError.value = 'No se pudieron cargar las publicaciones desde GitHub.';
-    postError.value =
-      'Se cargaron solo los datos locales por un error de GitHub.';
 
     const localPosts = loadPostsFromLocalStorage();
-    posts.value = localPosts || [];
+    posts.value = localPosts || createDefaultPosts();
   } finally {
     isLoading.value = false;
   }
 }
 
-async function savePosts() {
-  isLoading.value = true;
-  syncError.value = '';
+async function persistPosts() {
+  savePostsToLocalStorage();
 
-  try {
-    savePostsToLocalStorage();
+  if (!canWriteToGitHub.value) {
+    return;
+  }
 
-    if (!canSyncWithGitHub.value) {
-      postError.value = '';
-      return;
-    }
+  const response = await fetch(WORKER_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      user: loginForm.value.user || AUTHOR_USER,
+      password: sessionAuthorPassword.value,
+      posts: posts.value,
+    }),
+  });
 
-    const fileData = await fetchPostsFileFromGitHub();
-    const content = textToBase64(JSON.stringify(posts.value, null, 2));
-
-    const body = {
-      message: 'update newsletter posts',
-      content,
-      branch: BRANCH,
-    };
-
-    if (fileData?.sha) {
-      body.sha = fileData.sha;
-    }
-
-    const response = await fetch(GITHUB_CONTENTS_URL, {
-      method: 'PUT',
-      headers: buildGitHubHeaders(),
-      body: JSON.stringify(body),
-    });
-
-    if (!response.ok) {
-      throw new Error(`No se pudo guardar posts.json (${response.status}).`);
-    }
-  } catch (error) {
-    console.error(error);
-    syncError.value = 'No se pudieron guardar las publicaciones en GitHub.';
-    postError.value =
-      'Publicación guardada localmente. Revisa tu configuración de GitHub.';
-    throw error;
-  } finally {
-    isLoading.value = false;
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new Error(data.error || `No se pudo guardar (${response.status}).`);
   }
 }
 
@@ -228,6 +186,7 @@ function loginAuthor() {
 
   if (user === AUTHOR_USER && loginForm.value.password === AUTHOR_PASSWORD) {
     isAuthor.value = true;
+    sessionAuthorPassword.value = loginForm.value.password;
     sessionStorage.setItem(SESSION_STORAGE_KEY, 'true');
     loginForm.value = { user: '', password: '' };
     return;
@@ -238,6 +197,7 @@ function loginAuthor() {
 
 function logoutAuthor() {
   isAuthor.value = false;
+  sessionAuthorPassword.value = '';
   sessionStorage.removeItem(SESSION_STORAGE_KEY);
 }
 
@@ -275,11 +235,15 @@ async function addPost() {
     return;
   }
 
+  if (!canWriteToGitHub.value) {
+    postError.value =
+      'La publicación remota no está configurada (falta el Worker). Revisa VUE_APP_NEWSLETTER_WORKER_URL.';
+    return;
+  }
+
   const newPost = {
     id: Date.now(),
     title: postForm.value.title.trim(),
-    // Se conservan los saltos de línea tal cual los escribió el autor,
-    // solo se recortan espacios sobrantes al inicio/final.
     note: postForm.value.note.replace(/\s+$/, '').replace(/^\s+/, ''),
     photos: [...uploadedPhotos.value],
     createdAt: new Date().toISOString(),
@@ -287,13 +251,18 @@ async function addPost() {
 
   const previousPosts = [...posts.value];
   posts.value.push(newPost);
+  isLoading.value = true;
 
   try {
-    await savePosts();
+    await persistPosts();
     postForm.value = { title: '', note: '' };
     uploadedPhotos.value = [];
-  } catch {
+  } catch (error) {
+    console.error(error);
     posts.value = previousPosts;
+    postError.value = error.message || 'No se pudo publicar. Intenta de nuevo.';
+  } finally {
+    isLoading.value = false;
   }
 }
 
@@ -302,11 +271,16 @@ async function deletePost(postId) {
 
   const previousPosts = [...posts.value];
   posts.value = posts.value.filter((post) => post.id !== postId);
+  isLoading.value = true;
 
   try {
-    await savePosts();
-  } catch {
+    await persistPosts();
+  } catch (error) {
+    console.error(error);
     posts.value = previousPosts;
+    postError.value = error.message || 'No se pudo eliminar. Intenta de nuevo.';
+  } finally {
+    isLoading.value = false;
   }
 }
 
@@ -334,7 +308,6 @@ function formatDate(date) {
       <p v-if="syncWarning" class="warning-text">{{ syncWarning }}</p>
       <p v-if="syncError" class="warning-text">{{ syncError }}</p>
 
-      <!-- Botón para mostrar/ocultar el formulario de autor -->
       <div v-if="!isAuthor" class="author-toggle-wrapper">
         <button
           class="toggle-login-btn"
@@ -344,7 +317,6 @@ function formatDate(date) {
         </button>
       </div>
 
-      <!-- Formulario de acceso, oculto por defecto -->
       <div class="author-box" v-if="!isAuthor && showLoginForm">
         <h2>Acceso de autor</h2>
         <p>Solo el autor puede crear, editar o eliminar contenido.</p>
@@ -440,8 +412,6 @@ function formatDate(date) {
             </button>
           </div>
 
-          <!-- white-space: pre-wrap en el CSS conserva los saltos de línea
-               que el autor escribió, para que se vean como párrafos -->
           <p class="post-note">{{ post.note }}</p>
 
           <div class="post-photos" v-if="post.photos && post.photos.length">
@@ -553,7 +523,6 @@ textarea {
 
 .post-note {
   line-height: 1.8;
-  /* Conserva los saltos de línea y permite múltiples párrafos */
   white-space: pre-wrap;
   word-wrap: break-word;
 }
