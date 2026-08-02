@@ -30,6 +30,10 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Copy index.html as 404.html
+        # GitHub Pages serves 404.html for unknown routes; copy SPA shell so Vue Router handles deep links.
+        run: cp dist/index.html dist/404.html
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
