@@ -28,6 +28,7 @@ const isLoading = ref(false);
 const loginError = ref('');
 const postError = ref('');
 const syncError = ref('');
+const syncWarning = ref('');
 const showLoginForm = ref(false);
 
 const sortedPosts = computed(() =>
@@ -38,6 +39,16 @@ const sortedPosts = computed(() =>
 
 onMounted(async () => {
   isAuthor.value = sessionStorage.getItem(SESSION_STORAGE_KEY) === 'true';
+
+  // Avisa de inmediato si no hay sincronización configurada, para que
+  // no parezca que las publicaciones "desaparecen" en otros dispositivos.
+  if (!canSyncWithGitHub.value) {
+    syncWarning.value =
+      'La sincronización con GitHub no está configurada en este despliegue. ' +
+      'Las publicaciones que crees aquí solo se guardarán en este dispositivo/navegador ' +
+      'y no aparecerán en otros celulares o computadoras.';
+  }
+
   await loadPosts();
 });
 
@@ -138,6 +149,8 @@ async function loadPosts() {
       return;
     }
 
+    // Siempre que haya sincronización disponible, GitHub manda:
+    // así garantizamos que todos los dispositivos vean lo mismo.
     const fileData = await fetchPostsFileFromGitHub();
 
     if (!fileData) {
@@ -265,7 +278,9 @@ async function addPost() {
   const newPost = {
     id: Date.now(),
     title: postForm.value.title.trim(),
-    note: postForm.value.note.trim(),
+    // Se conservan los saltos de línea tal cual los escribió el autor,
+    // solo se recortan espacios sobrantes al inicio/final.
+    note: postForm.value.note.replace(/\s+$/, '').replace(/^\s+/, ''),
     photos: [...uploadedPhotos.value],
     createdAt: new Date().toISOString(),
   };
@@ -316,6 +331,7 @@ function formatDate(date) {
         Aquí se publican notas, avances y fotos del proceso creativo de
         <strong>Las luces de Palpanuma</strong>.
       </p>
+      <p v-if="syncWarning" class="warning-text">{{ syncWarning }}</p>
       <p v-if="syncError" class="warning-text">{{ syncError }}</p>
 
       <!-- Botón para mostrar/ocultar el formulario de autor -->
@@ -370,8 +386,8 @@ function formatDate(date) {
           />
           <textarea
             v-model="postForm.note"
-            rows="5"
-            placeholder="Escribe la nota del newsletter"
+            rows="8"
+            placeholder="Escribe la nota del newsletter. Presiona Enter para separar párrafos."
           />
         </div>
 
@@ -398,11 +414,15 @@ function formatDate(date) {
           </div>
         </div>
 
-        <button class="primary-btn" @click="addPost">
-          Publicar newsletter
+        <button class="primary-btn" :disabled="isLoading" @click="addPost">
+          {{ isLoading ? 'Publicando…' : 'Publicar newsletter' }}
         </button>
         <p v-if="postError" class="error-text">{{ postError }}</p>
       </div>
+
+      <p v-if="isLoading && !sortedPosts.length" class="loading-text">
+        Cargando publicaciones…
+      </p>
 
       <section class="posts-list">
         <article v-for="post in sortedPosts" :key="post.id" class="post-card">
@@ -420,6 +440,8 @@ function formatDate(date) {
             </button>
           </div>
 
+          <!-- white-space: pre-wrap en el CSS conserva los saltos de línea
+               que el autor escribió, para que se vean como párrafos -->
           <p class="post-note">{{ post.note }}</p>
 
           <div class="post-photos" v-if="post.photos && post.photos.length">
@@ -494,6 +516,11 @@ textarea {
   border-radius: 10px;
   font-size: 0.95rem;
   box-sizing: border-box;
+  font-family: inherit;
+}
+
+textarea {
+  resize: vertical;
 }
 
 .upload-label {
@@ -526,6 +553,9 @@ textarea {
 
 .post-note {
   line-height: 1.8;
+  /* Conserva los saltos de línea y permite múltiples párrafos */
+  white-space: pre-wrap;
+  word-wrap: break-word;
 }
 
 .primary-btn,
@@ -542,6 +572,11 @@ textarea {
   color: #ffffff;
 }
 
+.primary-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .danger-btn {
   background-color: #d64949;
   color: #fff;
@@ -554,6 +589,11 @@ textarea {
 
 .warning-text {
   color: #8a5a00;
+  margin-bottom: 16px;
+}
+
+.loading-text {
+  color: #666;
   margin-bottom: 16px;
 }
 
