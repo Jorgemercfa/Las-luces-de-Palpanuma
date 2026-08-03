@@ -32,6 +32,9 @@ const postForm = ref({ title: '', note: '' });
 const uploadedPhotos = ref([]);
 const posts = ref([]);
 const isAuthor = ref(false);
+// Cuando no es null, el formulario está editando esa publicación
+// en lugar de crear una nueva.
+const editingPostId = ref(null);
 // Guardamos la contraseña en memoria (no en localStorage) mientras dura la
 // sesión del autor, para poder autenticar cada guardado contra el Worker
 // sin pedirla de nuevo en cada publicación.
@@ -227,6 +230,25 @@ function removeUploadedPhoto(index) {
   uploadedPhotos.value.splice(index, 1);
 }
 
+function startEditPost(post) {
+  postError.value = '';
+  editingPostId.value = post.id;
+  postForm.value = { title: post.title, note: post.note };
+  uploadedPhotos.value = [...(post.photos || [])];
+
+  // Lleva la vista al formulario para que quede claro que se está editando.
+  document
+    .querySelector('.author-panel')
+    ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function cancelEdit() {
+  editingPostId.value = null;
+  postForm.value = { title: '', note: '' };
+  uploadedPhotos.value = [];
+  postError.value = '';
+}
+
 async function addPost() {
   postError.value = '';
 
@@ -241,22 +263,41 @@ async function addPost() {
     return;
   }
 
-  const newPost = {
-    id: Date.now(),
-    title: postForm.value.title.trim(),
-    note: postForm.value.note.replace(/\s+$/, '').replace(/^\s+/, ''),
-    photos: [...uploadedPhotos.value],
-    createdAt: new Date().toISOString(),
-  };
-
   const previousPosts = [...posts.value];
-  posts.value.push(newPost);
+  const cleanTitle = postForm.value.title.trim();
+  const cleanNote = postForm.value.note.replace(/\s+$/, '').replace(/^\s+/, '');
+
+  if (editingPostId.value) {
+    // Modo edición: reemplaza la publicación existente, conservando su
+    // fecha original de creación.
+    posts.value = posts.value.map((post) =>
+      post.id === editingPostId.value
+        ? {
+            ...post,
+            title: cleanTitle,
+            note: cleanNote,
+            photos: [...uploadedPhotos.value],
+          }
+        : post,
+    );
+  } else {
+    const newPost = {
+      id: Date.now(),
+      title: cleanTitle,
+      note: cleanNote,
+      photos: [...uploadedPhotos.value],
+      createdAt: new Date().toISOString(),
+    };
+    posts.value.push(newPost);
+  }
+
   isLoading.value = true;
 
   try {
     await persistPosts();
     postForm.value = { title: '', note: '' };
     uploadedPhotos.value = [];
+    editingPostId.value = null;
   } catch (error) {
     console.error(error);
     posts.value = previousPosts;
@@ -268,6 +309,10 @@ async function addPost() {
 
 async function deletePost(postId) {
   postError.value = '';
+
+  if (editingPostId.value === postId) {
+    cancelEdit();
+  }
 
   const previousPosts = [...posts.value];
   posts.value = posts.value.filter((post) => post.id !== postId);
@@ -344,7 +389,7 @@ function formatDate(date) {
 
       <div class="author-panel" v-if="isAuthor">
         <div class="author-panel-header">
-          <h2>Panel del autor</h2>
+          <h2>{{ editingPostId ? 'Editando publicación' : 'Panel del autor' }}</h2>
           <button class="primary-btn" @click="logoutAuthor">
             Cerrar sesión
           </button>
@@ -386,9 +431,25 @@ function formatDate(date) {
           </div>
         </div>
 
-        <button class="primary-btn" :disabled="isLoading" @click="addPost">
-          {{ isLoading ? 'Publicando…' : 'Publicar newsletter' }}
-        </button>
+        <div class="panel-actions">
+          <button class="primary-btn" :disabled="isLoading" @click="addPost">
+            {{
+              isLoading
+                ? 'Guardando…'
+                : editingPostId
+                  ? 'Guardar cambios'
+                  : 'Publicar newsletter'
+            }}
+          </button>
+          <button
+            v-if="editingPostId"
+            class="secondary-btn"
+            :disabled="isLoading"
+            @click="cancelEdit"
+          >
+            Cancelar edición
+          </button>
+        </div>
         <p v-if="postError" class="error-text">{{ postError }}</p>
       </div>
 
@@ -403,13 +464,14 @@ function formatDate(date) {
               <h3>{{ post.title }}</h3>
               <p class="post-date">{{ formatDate(post.createdAt) }}</p>
             </div>
-            <button
-              v-if="isAuthor"
-              class="danger-btn"
-              @click="deletePost(post.id)"
-            >
-              Eliminar
-            </button>
+            <div v-if="isAuthor" class="post-actions">
+              <button class="secondary-btn" @click="startEditPost(post)">
+                Editar
+              </button>
+              <button class="danger-btn" @click="deletePost(post.id)">
+                Eliminar
+              </button>
+            </div>
           </div>
 
           <p class="post-note">{{ post.note }}</p>
@@ -528,6 +590,7 @@ textarea {
 }
 
 .primary-btn,
+.secondary-btn,
 .danger-btn {
   border: none;
   border-radius: 8px;
@@ -541,14 +604,28 @@ textarea {
   color: #ffffff;
 }
 
-.primary-btn:disabled {
+.primary-btn:disabled,
+.secondary-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.secondary-btn {
+  background-color: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.4);
 }
 
 .danger-btn {
   background-color: #d64949;
   color: #fff;
+}
+
+.panel-actions,
+.post-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .error-text {
