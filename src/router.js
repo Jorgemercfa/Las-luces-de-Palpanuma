@@ -4,6 +4,7 @@ import Home from './views/Home-item.vue';
 import AuthorItem from './views/Author-item.vue';
 import stories from './views/Storie-item.vue';
 import NewsLetter from './views/NewsLetter-item.vue';
+import NewsletterPostDetail from './views/Newsletter-post-detail-item.vue';
 import IllustrationItem from './views/Illustration-item.vue';
 import MediaItem from './views/Media-item.vue';
 import Contact from './views/Contact-item.vue';
@@ -47,6 +48,15 @@ const routes = [
     meta: {
       title: 'Newsletter | Octavio Miranda',
       description: 'Suscríbete al newsletter de Octavio Miranda.',
+    },
+  },
+  {
+    path: '/newsletter/:slug',
+    name: 'NewsletterPostDetail',
+    component: NewsletterPostDetail,
+    meta: {
+      title: 'Newsletter | Octavio Miranda',
+      description: 'Nota del newsletter de Octavio Miranda.',
     },
   },
   {

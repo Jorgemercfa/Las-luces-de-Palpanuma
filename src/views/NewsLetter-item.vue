@@ -2,35 +2,29 @@
 import { computed, ref, onMounted } from 'vue';
 import navbar from '@/components/Navbar-item.vue';
 import Footer from '@/components/Footer-item.vue';
+import { useNewsletterPosts } from '@/composables/useNewsletterPosts';
 
 const AUTHOR_USER = 'octavio';
 const AUTHOR_PASSWORD = 'Palpanuma2026';
 const SESSION_STORAGE_KEY = 'palpanuma-newsletter-author';
 
-// Estos ya NO son secretos: solo se usan para leer el archivo público
-// posts.json directamente de GitHub. El token vive únicamente en el Worker.
-const GITHUB_USER = process.env.VUE_APP_GITHUB_USER || '';
-const GITHUB_REPO = process.env.VUE_APP_GITHUB_REPO || '';
-const GITHUB_BRANCH = process.env.VUE_APP_GITHUB_BRANCH || 'main';
-const FILE_PATH = 'public/posts.json';
-
 // URL del Cloudflare Worker que sí tiene el token de GitHub (oculto en su lado).
 const WORKER_URL = process.env.VUE_APP_NEWSLETTER_WORKER_URL || '';
-
-const LOCAL_STORAGE_KEY = 'palpanuma-newsletter-posts';
-
-const RAW_POSTS_URL = computed(
-  () =>
-    `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/${GITHUB_BRANCH}/${FILE_PATH}`,
-);
-
-const canReadFromGitHub = computed(() => Boolean(GITHUB_USER && GITHUB_REPO));
 const canWriteToGitHub = computed(() => Boolean(WORKER_URL));
+
+const {
+  posts,
+  sortedPosts,
+  isLoading,
+  syncError,
+  syncWarning,
+  loadPosts,
+  persistToLocalStorage,
+} = useNewsletterPosts();
 
 const loginForm = ref({ user: '', password: '' });
 const postForm = ref({ title: '', note: '' });
 const uploadedPhotos = ref([]);
-const posts = ref([]);
 const isAuthor = ref(false);
 // Cuando no es null, el formulario está editando esa publicación
 // en lugar de crear una nueva.
@@ -39,129 +33,24 @@ const editingPostId = ref(null);
 // sesión del autor, para poder autenticar cada guardado contra el Worker
 // sin pedirla de nuevo en cada publicación.
 const sessionAuthorPassword = ref('');
-const isLoading = ref(false);
 const loginError = ref('');
 const postError = ref('');
-const syncError = ref('');
-const syncWarning = ref('');
 const showLoginForm = ref(false);
-
-const sortedPosts = computed(() =>
-  [...posts.value].sort(
-    (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
-  ),
-);
+const copiedSlug = ref('');
 
 onMounted(async () => {
   isAuthor.value = sessionStorage.getItem(SESSION_STORAGE_KEY) === 'true';
 
-  if (!canReadFromGitHub.value) {
-    syncWarning.value =
-      'La sincronización no está configurada en este despliegue. ' +
-      'Las publicaciones solo se guardarán en este dispositivo/navegador.';
-  } else if (!canWriteToGitHub.value) {
-    syncWarning.value =
-      'La lectura de publicaciones está sincronizada, pero falta configurar ' +
-      'el Worker de publicación (VUE_APP_NEWSLETTER_WORKER_URL). No podrás publicar hasta configurarlo.';
+  if (!canWriteToGitHub.value) {
+    postError.value =
+      'Falta configurar el Worker de publicación (VUE_APP_NEWSLETTER_WORKER_URL).';
   }
 
   await loadPosts();
 });
 
-function createDefaultPosts() {
-  return [
-    {
-      id: Date.now(),
-      title: 'Bienvenidos al Newsletter',
-      note: 'Este espacio será usado para compartir avances del libro, notas del autor e imágenes exclusivas del proceso creativo.',
-      photos: [],
-      createdAt: new Date().toISOString(),
-    },
-  ];
-}
-
-function savePostsToLocalStorage() {
-  localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(posts.value));
-}
-
-function loadPostsFromLocalStorage() {
-  const savedPosts = localStorage.getItem(LOCAL_STORAGE_KEY);
-
-  if (!savedPosts) {
-    return null;
-  }
-
-  try {
-    const parsed = JSON.parse(savedPosts);
-    return Array.isArray(parsed) ? parsed : null;
-  } catch {
-    return null;
-  }
-}
-
-async function fetchPostsFromGitHub() {
-  if (!canReadFromGitHub.value) {
-    return null;
-  }
-
-  // Lectura pública y directa: no necesita token porque el repo es público
-  // y solo estamos leyendo, no escribiendo.
-  const response = await fetch(`${RAW_POSTS_URL.value}?t=${Date.now()}`);
-
-  if (response.status === 404) {
-    return null;
-  }
-
-  if (!response.ok) {
-    throw new Error(`No se pudo leer posts.json (${response.status}).`);
-  }
-
-  const parsed = await response.json();
-  return Array.isArray(parsed) ? parsed : [];
-}
-
-async function loadPosts() {
-  isLoading.value = true;
-  syncError.value = '';
-
-  try {
-    const localPosts = loadPostsFromLocalStorage();
-
-    if (localPosts) {
-      posts.value = localPosts;
-    }
-
-    if (!canReadFromGitHub.value) {
-      if (!localPosts) {
-        posts.value = createDefaultPosts();
-        savePostsToLocalStorage();
-      }
-      return;
-    }
-
-    const remotePosts = await fetchPostsFromGitHub();
-
-    if (remotePosts === null) {
-      posts.value = localPosts || createDefaultPosts();
-      savePostsToLocalStorage();
-      return;
-    }
-
-    posts.value = remotePosts;
-    savePostsToLocalStorage();
-  } catch (error) {
-    console.error(error);
-    syncError.value = 'No se pudieron cargar las publicaciones desde GitHub.';
-
-    const localPosts = loadPostsFromLocalStorage();
-    posts.value = localPosts || createDefaultPosts();
-  } finally {
-    isLoading.value = false;
-  }
-}
-
 async function persistPosts() {
-  savePostsToLocalStorage();
+  persistToLocalStorage();
 
   if (!canWriteToGitHub.value) {
     return;
@@ -236,7 +125,6 @@ function startEditPost(post) {
   postForm.value = { title: post.title, note: post.note };
   uploadedPhotos.value = [...(post.photos || [])];
 
-  // Lleva la vista al formulario para que quede claro que se está editando.
   document
     .querySelector('.author-panel')
     ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -268,8 +156,6 @@ async function addPost() {
   const cleanNote = postForm.value.note.replace(/\s+$/, '').replace(/^\s+/, '');
 
   if (editingPostId.value) {
-    // Modo edición: reemplaza la publicación existente, conservando su
-    // fecha original de creación.
     posts.value = posts.value.map((post) =>
       post.id === editingPostId.value
         ? {
@@ -326,6 +212,19 @@ async function deletePost(postId) {
     postError.value = error.message || 'No se pudo eliminar. Intenta de nuevo.';
   } finally {
     isLoading.value = false;
+  }
+}
+
+async function copyPostLink(slug) {
+  const url = `${window.location.origin}/newsletter/${slug}`;
+  try {
+    await navigator.clipboard.writeText(url);
+    copiedSlug.value = slug;
+    setTimeout(() => {
+      copiedSlug.value = '';
+    }, 2000);
+  } catch (error) {
+    console.error(error);
   }
 }
 
@@ -461,14 +360,32 @@ function formatDate(date) {
         <article v-for="post in sortedPosts" :key="post.id" class="post-card">
           <div class="post-header">
             <div>
-              <h3>{{ post.title }}</h3>
+              <h3>
+                <router-link
+                  :to="`/newsletter/${post.slug}`"
+                  class="post-title-link"
+                >
+                  {{ post.title }}
+                </router-link>
+              </h3>
               <p class="post-date">{{ formatDate(post.createdAt) }}</p>
             </div>
-            <div v-if="isAuthor" class="post-actions">
-              <button class="secondary-btn" @click="startEditPost(post)">
+            <div class="post-actions">
+              <button class="secondary-btn" @click="copyPostLink(post.slug)">
+                {{ copiedSlug === post.slug ? '¡Copiado!' : '🔗 Compartir' }}
+              </button>
+              <button
+                v-if="isAuthor"
+                class="secondary-btn"
+                @click="startEditPost(post)"
+              >
                 Editar
               </button>
-              <button class="danger-btn" @click="deletePost(post.id)">
+              <button
+                v-if="isAuthor"
+                class="danger-btn"
+                @click="deletePost(post.id)"
+              >
                 Eliminar
               </button>
             </div>
@@ -587,6 +504,15 @@ textarea {
   line-height: 1.8;
   white-space: pre-wrap;
   word-wrap: break-word;
+}
+
+.post-title-link {
+  color: #fff;
+  text-decoration: none;
+}
+
+.post-title-link:hover {
+  text-decoration: underline;
 }
 
 .primary-btn,
